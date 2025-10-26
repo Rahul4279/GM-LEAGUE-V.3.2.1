@@ -1,0 +1,1069 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - GM League Season 2 Live Scores{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <div class="main-container">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-warning mb-3">
+                <i class="fas fa-cog me-3"></i>GM League Season 2 Live Scores Admin Dashboard
+            </h1>
+            <p class="lead text-light">
+                Manage live scores and team information
+            </p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">50+</h3>
+                        <p class="stat-label">Teams</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">4</h3>
+                        <p class="stat-label">Sports</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">100+</h3>
+                        <p class="stat-label">Matches</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">12</h3>
+                        <p class="stat-label">Live Matches</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Score Management -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>Team Score Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="team-score-form">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="sport-select" class="form-label">Sport</label>
+                                    <select class="form-control" id="sport-select" required>
+                                        <option value="">Select Sport</option>
+                                        <option value="Football">Football</option>
+                                        <option value="Kabaddi">Kabaddi</option>
+                                        <option value="Basketball">Basketball</option>
+                                        <option value="Badminton">Badminton</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="team1-name" class="form-label">Team 1 Name</label>
+                                    <input type="text" class="form-control" id="team1-name" placeholder="e.g., Team Alpha" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="team1-score" class="form-label">Team 1 Score</label>
+                                    <input type="number" class="form-control" id="team1-score" min="0" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="team2-score" class="form-label">Team 2 Score</label>
+                                    <input type="number" class="form-control" id="team2-score" min="0" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="team2-name" class="form-label">Team 2 Name</label>
+                                    <input type="text" class="form-control" id="team2-name" placeholder="e.g., Team Beta" required>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-2"></i>Update Score
+                                </button>
+                                <button type="button" class="btn btn-outline-warning ms-2" onclick="clearScoreForm()">
+                                    <i class="fas fa-eraser me-2"></i>Clear Form
+                                </button>
+                                <button type="button" class="btn btn-outline-danger ms-2" onclick="deleteScore()">
+                                    <i class="fas fa-trash me-2"></i>Delete Score
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Scores Display -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Current Scores
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="current-scores-display">
+                            <!-- Scores will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Score Management -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-broadcast-tower me-2"></i>Live Score Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-futbol fa-2x text-warning mb-2"></i>
+                                    <h6>Football</h6>
+                                    <span class="badge bg-success mb-2" id="current-football">Loading...</span>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="toggleLiveStatus('Football')" id="football-toggle">
+                                            <i class="fas fa-toggle-on me-1"></i>Toggle Live
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-running fa-2x text-warning mb-2"></i>
+                                    <h6>Kabaddi</h6>
+                                    <span class="badge bg-success mb-2" id="current-kabaddi">Loading...</span>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="toggleLiveStatus('Kabaddi')" id="kabaddi-toggle">
+                                            <i class="fas fa-toggle-on me-1"></i>Toggle Live
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-basketball-ball fa-2x text-warning mb-2"></i>
+                                    <h6>Basketball</h6>
+                                    <span class="badge bg-success mb-2" id="current-basketball">Loading...</span>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="toggleLiveStatus('Basketball')" id="basketball-toggle">
+                                            <i class="fas fa-toggle-on me-1"></i>Toggle Live
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <i class="fas fa-table-tennis fa-2x text-warning mb-2"></i>
+                                    <h6>Badminton</h6>
+                                    <span class="badge bg-success mb-2" id="current-badminton">Loading...</span>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="toggleLiveStatus('Badminton')" id="badminton-toggle">
+                                            <i class="fas fa-toggle-on me-1"></i>Toggle Live
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Management -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy me-2"></i>Leaderboard Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="leaderboard-form">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="team-sport" class="form-label">Sport</label>
+                                    <select class="form-control" id="team-sport" required>
+                                        <option value="">Select Sport</option>
+                                        <option value="Football">Football</option>
+                                        <option value="Kabaddi">Kabaddi</option>
+                                        <option value="Basketball">Basketball</option>
+                                        <option value="Badminton">Badminton</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="team-name" class="form-label">Team Name</label>
+                                    <input type="text" class="form-control" id="team-name" placeholder="e.g., Team Alpha" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="team-points" class="form-label">Points</label>
+                                    <input type="number" class="form-control" id="team-points" min="0" placeholder="0" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="fas fa-plus me-2"></i>Add Team
+                                    </button>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-outline-info w-100" onclick="loadLeaderboardTable()">
+                                        <i class="fas fa-edit me-2"></i>Edit Teams
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="mt-4">
+                            <button class="btn btn-outline-warning" onclick="loadLeaderboardData()">
+                                <i class="fas fa-refresh me-2"></i>Refresh Leaderboard
+                            </button>
+                            <button class="btn btn-outline-info ms-2" onclick="loadLeaderboard('')">
+                                <i class="fas fa-eye me-2"></i>View Leaderboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Edit Table -->
+        <div class="row mb-5" id="leaderboard-edit-section" style="display: none;">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>Edit Leaderboard Teams
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="leaderboard-edit-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Team Name</th>
+                                        <th>Sport</th>
+                                        <th>Points</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-edit-tbody">
+                                    <!-- Teams will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Management -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>Player & Team Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Add Player Form -->
+                        <form id="player-form" class="mb-4">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="player-sport" class="form-label">Sport</label>
+                                    <select class="form-control" id="player-sport" required>
+                                        <option value="">Select Sport</option>
+                                        <option value="Football">Football</option>
+                                        <option value="Kabaddi">Kabaddi</option>
+                                        <option value="Basketball">Basketball</option>
+                                        <option value="Badminton">Badminton</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="player-team" class="form-label">Team Name</label>
+                                    <input type="text" class="form-control" id="player-team" placeholder="e.g., Team Alpha" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="player-name" class="form-label">Player Name</label>
+                                    <input type="text" class="form-control" id="player-name" placeholder="e.g., John Doe" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="fas fa-plus me-2"></i>Add Player
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Sport Filter -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="filter-sport" class="form-label">Filter by Sport</label>
+                                <select class="form-control" id="filter-sport" onchange="loadPlayers()">
+                                    <option value="">All Sports</option>
+                                    <option value="Football">Football</option>
+                                    <option value="Kabaddi">Kabaddi</option>
+                                    <option value="Basketball">Basketball</option>
+                                    <option value="Badminton">Badminton</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-outline-warning" onclick="loadPlayers()">
+                                    <i class="fas fa-refresh me-2"></i>Refresh Players
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Players Display -->
+                        <div id="players-display" class="row">
+                            <!-- Players will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="admin-section-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-warning w-100" onclick="loadCurrentScores()">
+                                    <i class="fas fa-refresh me-2"></i>Refresh Scores
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-warning w-100" onclick="clearScoreForm()">
+                                    <i class="fas fa-eraser me-2"></i>Clear Form
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ url_for('index') }}" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-eye me-2"></i>View Live Page
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Function to load current scores
+function loadCurrentScores() {
+    fetch('/get_scores')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('current-football').textContent = data.Football.score || 'No score';
+            document.getElementById('current-kabaddi').textContent = data.Kabaddi.score || 'No score';
+            document.getElementById('current-basketball').textContent = data.Basketball.score || 'No score';
+            document.getElementById('current-badminton').textContent = data.Badminton.score || 'No score';
+            
+            // Update toggle button states
+            updateToggleButtons(data);
+        })
+        .catch(error => console.error('Error loading scores:', error));
+}
+
+// Function to update toggle button states
+function updateToggleButtons(data) {
+    const games = ['Football', 'Kabaddi', 'Basketball', 'Badminton'];
+    games.forEach(game => {
+        const toggleBtn = document.getElementById(`${game.toLowerCase()}-toggle`);
+        const isLive = data[game].is_live;
+        
+        if (toggleBtn) {
+            if (isLive) {
+                toggleBtn.innerHTML = '<i class="fas fa-toggle-on me-1"></i>Turn Off Live';
+                toggleBtn.className = 'btn btn-sm btn-outline-danger';
+            } else {
+                toggleBtn.innerHTML = '<i class="fas fa-toggle-off me-1"></i>Turn On Live';
+                toggleBtn.className = 'btn btn-sm btn-outline-warning';
+            }
+        }
+    });
+}
+
+// Function to toggle live status
+function toggleLiveStatus(game) {
+    fetch('/toggle_live', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            game: game
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`${game} is now ${data.is_live ? 'LIVE' : 'OFF'}!`, 'success');
+            loadCurrentScores(); // Refresh the display
+            displayCurrentScores(); // Refresh the current scores display
+        } else {
+            showNotification('Error toggling live status. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error toggling live status. Please try again.', 'error');
+    });
+}
+
+// Function to clear score form
+function clearScoreForm() {
+    document.getElementById('team-score-form').reset();
+}
+
+// Team score form submission
+document.getElementById('team-score-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const sport = document.getElementById('sport-select').value;
+    const team1Name = document.getElementById('team1-name').value;
+    const team1Score = document.getElementById('team1-score').value;
+    const team2Score = document.getElementById('team2-score').value;
+    const team2Name = document.getElementById('team2-name').value;
+    
+    if (!sport || !team1Name || !team1Score || !team2Score || !team2Name) {
+        showNotification('Please fill in all fields!', 'error');
+        return;
+    }
+    
+    // Create score data
+    const scoreData = `${team1Name} ${team1Score} - ${team2Score} ${team2Name}`;
+    
+    // Update score via API
+    fetch('/update_score', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            game: sport,
+            score_data: scoreData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Score updated successfully for ${sport}!`, 'success');
+            loadCurrentScores(); // Refresh the display
+            displayCurrentScores(); // Refresh the current scores display
+            this.reset(); // Clear the form
+        } else {
+            showNotification('Error updating score. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error updating score. Please try again.', 'error');
+    });
+});
+
+// Function to show notifications
+function showNotification(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.main-container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Leaderboard form submission
+document.getElementById('leaderboard-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const sport = document.getElementById('team-sport').value;
+    const teamName = document.getElementById('team-name').value;
+    const points = document.getElementById('team-points').value;
+    
+    if (!sport || !teamName || !points) {
+        showNotification('Please fill in all fields!', 'error');
+        return;
+    }
+    
+    // Add team to leaderboard via API
+    fetch('/api/leaderboard/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: teamName,
+            sport: sport,
+            points: parseInt(points)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Team ${teamName} added to leaderboard successfully!`, 'success');
+            this.reset(); // Clear the form
+        } else {
+            showNotification('Error adding team to leaderboard. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error adding team to leaderboard. Please try again.', 'error');
+    });
+});
+
+// Function to load leaderboard data
+function loadLeaderboardData() {
+    fetch('/api/leaderboard')
+        .then(response => response.json())
+        .then(data => {
+            showNotification(`Leaderboard loaded with ${data.length} teams!`, 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error loading leaderboard data.', 'error');
+        });
+}
+
+// Function to display current scores in a nice format
+function displayCurrentScores() {
+    fetch('/get_scores')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('current-scores-display');
+            let html = '';
+            
+            Object.keys(data).forEach(game => {
+                const scoreData = data[game];
+                const isLive = scoreData.is_live;
+                const score = scoreData.score || 'No live match';
+                
+                html += `
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card h-100" style="border: 2px solid ${isLive ? '#10b981' : '#e5e7eb'};">
+                            <div class="card-header text-center" style="background: ${isLive ? '#10b981' : '#6b7280'}; color: white;">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-${getGameIcon(game)} me-2"></i>${game}
+                                </h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <p class="card-text">${score}</p>
+                                <span class="badge ${isLive ? 'bg-success' : 'bg-secondary'}">${isLive ? 'LIVE' : 'OFF'}</span>
+                            </div>
+                            <div class="card-footer text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editScore('${game}')">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteScore('${game}')">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error loading scores:', error);
+        });
+}
+
+// Function to get game icon
+function getGameIcon(game) {
+    const icons = {
+        'Football': 'futbol',
+        'Basketball': 'basketball-ball',
+        'Kabaddi': 'running',
+        'Badminton': 'table-tennis'
+    };
+    return icons[game] || 'gamepad';
+}
+
+// Function to edit score
+function editScore(game) {
+    // Pre-fill the form with current score data
+    document.getElementById('sport-select').value = game;
+    
+    // Parse the current score to extract team names and scores
+    fetch('/get_scores')
+        .then(response => response.json())
+        .then(data => {
+            const scoreText = data[game].score;
+            if (scoreText && scoreText !== 'No live match') {
+                // Try to parse the score format: "Team1 Score1 - Score2 Team2"
+                const match = scoreText.match(/(.+?)\s+(\d+)\s*-\s*(\d+)\s+(.+)/);
+                if (match) {
+                    document.getElementById('team1-name').value = match[1].trim();
+                    document.getElementById('team1-score').value = match[2];
+                    document.getElementById('team2-score').value = match[3];
+                    document.getElementById('team2-name').value = match[4].trim();
+                }
+            }
+        });
+    
+    // Scroll to the form
+    document.getElementById('team-score-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Function to delete score
+function deleteScore(game = null) {
+    const gameToDelete = game || document.getElementById('sport-select').value;
+    
+    if (!gameToDelete) {
+        showNotification('Please select a sport to delete!', 'error');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete the score for ${gameToDelete}?`)) {
+        fetch('/api/scores/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                game: gameToDelete
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(`Score deleted successfully for ${gameToDelete}!`, 'success');
+                loadCurrentScores();
+                displayCurrentScores();
+            } else {
+                showNotification('Error deleting score. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error deleting score. Please try again.', 'error');
+        });
+    }
+}
+
+// Function to load leaderboard table for editing
+function loadLeaderboardTable() {
+    fetch('/api/leaderboard')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('leaderboard-edit-tbody');
+            let html = '';
+            
+            data.forEach((team, index) => {
+                html += `
+                    <tr>
+                        <td><strong>#${index + 1}</strong></td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" value="${team.name}" 
+                                   onchange="updateTeamField('${team.name}', '${team.sport}', 'name', this.value)">
+                        </td>
+                        <td>
+                            <select class="form-control form-control-sm" 
+                                    onchange="updateTeamField('${team.name}', '${team.sport}', 'sport', this.value)">
+                                <option value="Football" ${team.sport === 'Football' ? 'selected' : ''}>Football</option>
+                                <option value="Basketball" ${team.sport === 'Basketball' ? 'selected' : ''}>Basketball</option>
+                                <option value="Kabaddi" ${team.sport === 'Kabaddi' ? 'selected' : ''}>Kabaddi</option>
+                                <option value="Badminton" ${team.sport === 'Badminton' ? 'selected' : ''}>Badminton</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm" value="${team.points}" 
+                                   onchange="updateTeamField('${team.name}', '${team.sport}', 'points', this.value)">
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTeam('${team.name}', '${team.sport}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            document.getElementById('leaderboard-edit-section').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error loading leaderboard data.', 'error');
+        });
+}
+
+// Function to update team field
+function updateTeamField(oldName, oldSport, field, newValue) {
+    fetch('/api/leaderboard/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: oldName,
+            sport: oldSport,
+            points: field === 'points' ? parseInt(newValue) : undefined
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Team ${oldName} updated successfully!`, 'success');
+        } else {
+            showNotification('Error updating team. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error updating team. Please try again.', 'error');
+    });
+}
+
+// Function to delete team
+function deleteTeam(teamName, sport) {
+    if (confirm(`Are you sure you want to delete ${teamName} from ${sport}?`)) {
+        fetch('/api/leaderboard/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: teamName,
+                sport: sport
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(`Team ${teamName} deleted successfully!`, 'success');
+                loadLeaderboardTable(); // Refresh the table
+            } else {
+                showNotification('Error deleting team. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error deleting team. Please try again.', 'error');
+        });
+    }
+}
+
+// Player management functions
+// Load players on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadCurrentScores();
+    displayCurrentScores();
+    loadPlayers();
+});
+
+// Player form submission
+document.getElementById('player-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const sport = document.getElementById('player-sport').value;
+    const team = document.getElementById('player-team').value;
+    const name = document.getElementById('player-name').value;
+    
+    if (!sport || !team || !name) {
+        showNotification('Please fill in all fields!', 'error');
+        return;
+    }
+    
+    fetch('/api/players/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: name,
+            team: team,
+            sport: sport,
+            points: 0
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Player ${name} added successfully!`, 'success');
+            this.reset();
+            loadPlayers();
+        } else {
+            showNotification('Error adding player. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error adding player. Please try again.', 'error');
+    });
+});
+
+// Load players
+function loadPlayers() {
+    const sport = document.getElementById('filter-sport').value;
+    let url = '/api/players';
+    if (sport) {
+        url += `?sport=${sport}`;
+    }
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            displayPlayers(data);
+        })
+        .catch(error => {
+            console.error('Error loading players:', error);
+        });
+}
+
+// Display players grouped by team
+function displayPlayers(players) {
+    const container = document.getElementById('players-display');
+    
+    if (players.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center"><p>No players found. Add some players to get started!</p></div>';
+        return;
+    }
+    
+    // Group players by team and sport
+    const groupedTeams = {};
+    players.forEach(player => {
+        const key = `${player.sport}-${player.team}`;
+        if (!groupedTeams[key]) {
+            groupedTeams[key] = {
+                sport: player.sport,
+                team: player.team,
+                players: [],
+                totalPoints: 0,
+                totalGoals: 0
+            };
+        }
+        groupedTeams[key].players.push(player);
+        groupedTeams[key].totalPoints += player.points;
+        groupedTeams[key].totalGoals += player.goals;
+    });
+    
+    let html = '';
+    Object.values(groupedTeams).forEach(team => {
+        html += `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="team-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 20px; color: white; border: 2px solid #f59e0b;">
+                    <div class="team-header mb-3" style="border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px;">
+                        <h5 style="margin: 0; font-weight: bold;">
+                            <i class="fas fa-users me-2"></i>${team.team}
+                        </h5>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">
+                            <i class="fas fa-${getGameIcon(team.sport)} me-1"></i>${team.sport}
+                        </p>
+                    </div>
+                    <div class="team-stats mb-3" style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: bold;">${team.totalPoints}</div>
+                            <div style="font-size: 0.8rem; opacity: 0.9;">Total Points</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: bold;">${team.totalGoals}</div>
+                            <div style="font-size: 0.8rem; opacity: 0.9;">Total Goals</div>
+                        </div>
+                    </div>
+                    <div class="players-list" style="max-height: 400px; overflow-y: auto;">
+                        ${team.players.map(player => `
+                            <div class="player-item" style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                    <strong>${player.name}</strong>
+                                    <div>
+                                        <button class="btn btn-sm" style="background: #f59e0b; color: white; border: none; border-radius: 8px; padding: 5px 15px; font-weight: bold; margin-right: 5px;" onclick="addPlayerPoint(${player.id})">
+                                            +1
+                                        </button>
+                                        <button class="btn btn-sm" style="background: #06b6d4; color: white; border: none; border-radius: 8px; padding: 5px 10px; font-weight: bold; margin-right: 5px;" onclick="editPlayer(${player.id}, '${player.name}', '${player.team}', '${player.sport}', ${player.points}, ${player.goals})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 5px 10px; font-weight: bold;" onclick="deletePlayerConfirm(${player.id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; opacity: 0.9;">
+                                    <span>Points: <strong>${player.points}</strong></span>
+                                    <span>Goals: <strong>${player.goals}</strong></span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Add point to player
+function addPlayerPoint(playerId) {
+    fetch(`/api/players/${playerId}/add_point`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Point added to ${data.player.name}!`, 'success');
+            loadPlayers();
+        } else {
+            showNotification('Error adding point. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error adding point. Please try again.', 'error');
+    });
+}
+
+// Get game icon for display
+function getGameIcon(game) {
+    const icons = {
+        'Football': 'futbol',
+        'Kabaddi': 'running',
+        'Basketball': 'basketball-ball',
+        'Badminton': 'table-tennis'
+    };
+    return icons[game] || 'gamepad';
+}
+
+// Edit player function
+function editPlayer(playerId, name, team, sport, points, goals) {
+    const newName = prompt(`Edit player name:`, name);
+    if (newName === null || newName.trim() === '') return;
+    
+    const newTeam = prompt(`Edit team:`, team);
+    if (newTeam === null || newTeam.trim() === '') return;
+    
+    const newPoints = parseInt(prompt(`Edit points:`, points));
+    if (isNaN(newPoints)) return;
+    
+    const newGoals = parseInt(prompt(`Edit goals:`, goals));
+    if (isNaN(newGoals)) return;
+    
+    fetch(`/api/players/${playerId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: newName,
+            team: newTeam,
+            sport: sport,
+            points: newPoints,
+            goals: newGoals
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Player ${newName} updated successfully!`, 'success');
+            loadPlayers();
+        } else {
+            showNotification('Error updating player. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error updating player. Please try again.', 'error');
+    });
+}
+
+// Delete player confirmation
+function deletePlayerConfirm(playerId) {
+    if (confirm('Are you sure you want to delete this player?')) {
+        deletePlayer(playerId);
+    }
+}
+
+// Delete player
+function deletePlayer(playerId) {
+    fetch(`/api/players/${playerId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Player deleted successfully!', 'success');
+            loadPlayers();
+        } else {
+            showNotification('Error deleting player. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error deleting player. Please try again.', 'error');
+    });
+}
+</script>
+{% endblock %}

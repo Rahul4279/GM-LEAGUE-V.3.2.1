@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - GM League Season 2 Live Scores{% endblock %}
+
+{% block content %}
+
+<!-- Leaderboard Section -->
+<div class="leaderboard-section">
+    <h2 class="leaderboard-title">
+        <i class="fas fa-trophy me-3"></i>Leaderboard
+    </h2>
+    <p class="section-subtitle text-center">View the latest rankings and team standings</p>
+    
+    <!-- Sport Selection Dropdown -->
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <div class="form-group">
+                <label for="sport-select" class="form-label">Select Sport</label>
+                <select class="form-control" id="sport-select" onchange="loadLeaderboard()">
+                    <option value="">All Sports</option>
+                    <option value="Football">Football</option>
+                    <option value="Kabaddi">Kabaddi</option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Badminton">Badminton</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaderboard Content -->
+    <div id="leaderboard-content">
+        <div class="row">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="leaderboard-card">
+                    <div class="team-rank">#1 Loading...</div>
+                    <div class="team-score">Please select a sport</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Leaderboard functionality
+function loadLeaderboard() {
+    const selectedSport = document.getElementById('sport-select').value;
+    
+    // Fetch leaderboard data from server
+    fetch(`/api/leaderboard${selectedSport ? '?sport=' + selectedSport : ''}`)
+        .then(response => response.json())
+        .then(data => {
+            updateLeaderboardDisplay(data);
+        })
+        .catch(error => {
+            console.error('Error loading leaderboard:', error);
+        });
+}
+
+function updateLeaderboardDisplay(data) {
+    const container = document.getElementById('leaderboard-content');
+    
+    if (data.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center"><p>No teams found for this sport.</p></div>';
+        return;
+    }
+    
+    let html = '<div class="row">';
+    data.forEach((team, index) => {
+        const rank = index + 1;
+        const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+        
+        html += `
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="leaderboard-card" style="text-align: center;">
+                    <div class="team-rank" style="font-size: 2rem; margin-bottom: 10px;">
+                        ${rankIcon}
+                    </div>
+                    <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 10px;">
+                        ${team.name}
+                    </div>
+                    <div class="team-score">
+                        <i class="fas fa-futbol me-1"></i>${team.sport}
+                    </div>
+                    <div style="font-size: 2rem; color: var(--primary-gold); font-weight: bold; margin-top: 15px;">
+                        ${team.points}
+                    </div>
+                    <div style="opacity: 0.8; font-size: 0.9rem;">
+                        Points
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+// Load leaderboard on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadLeaderboard();
+});
+</script>
+{% endblock %}
+
